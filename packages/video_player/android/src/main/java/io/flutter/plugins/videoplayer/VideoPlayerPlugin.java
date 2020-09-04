@@ -49,6 +49,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import android.util.LongSparseArray;
+import com.google.android.exoplayer2.PlaybackParameters;
+
 
 public class VideoPlayerPlugin implements MethodCallHandler {
 
@@ -224,6 +227,13 @@ public class VideoPlayerPlugin implements MethodCallHandler {
       return exoPlayer.getCurrentPosition();
     }
 
+    void setSpeed(double value) {
+      float bracketedValue = (float) value;
+      PlaybackParameters existingParam = exoPlayer.getPlaybackParameters();
+      PlaybackParameters newParameter =
+              new PlaybackParameters(bracketedValue, existingParam.pitch, existingParam.skipSilence);
+      exoPlayer.setPlaybackParameters(newParameter);
+    }
     private void sendInitialized() {
       if (isInitialized) {
         Map<String, Object> event = new HashMap<>();
@@ -398,6 +408,10 @@ public class VideoPlayerPlugin implements MethodCallHandler {
       case "dispose":
         player.dispose();
         videoPlayers.remove(textureId);
+        result.success(null);
+        break;
+      case "setSpeed":
+        player.setSpeed((Double) call.argument("speed"));
         result.success(null);
         break;
       default:
